@@ -32,7 +32,7 @@ jobs:
       - uses: docker/metadata-action@v5
         id: meta
         with:
-          images: ${{ env.REGISTRY }}/maikbuse/hyperplane/plane-frontend
+          images: ${{ env.REGISTRY }}/maikbuse/hyperplane/hyperplane-frontend
           tags: |
             type=ref,event=branch
             type=sha,prefix=sha-
@@ -65,7 +65,7 @@ jobs:
       - uses: docker/metadata-action@v5
         id: meta
         with:
-          images: ${{ env.REGISTRY }}/maikbuse/hyperplane/plane-admin
+          images: ${{ env.REGISTRY }}/maikbuse/hyperplane/hyperplane-admin
           tags: |
             type=ref,event=branch
             type=sha,prefix=sha-
@@ -98,7 +98,7 @@ jobs:
       - uses: docker/metadata-action@v5
         id: meta
         with:
-          images: ${{ env.REGISTRY }}/maikbuse/hyperplane/plane-space
+          images: ${{ env.REGISTRY }}/maikbuse/hyperplane/hyperplane-space
           tags: |
             type=ref,event=branch
             type=sha,prefix=sha-
@@ -131,7 +131,7 @@ jobs:
       - uses: docker/metadata-action@v5
         id: meta
         with:
-          images: ${{ env.REGISTRY }}/maikbuse/hyperplane/plane-backend
+          images: ${{ env.REGISTRY }}/maikbuse/hyperplane/hyperplane-backend
           tags: |
             type=ref,event=branch
             type=sha,prefix=sha-
@@ -164,7 +164,7 @@ jobs:
       - uses: docker/metadata-action@v5
         id: meta
         with:
-          images: ${{ env.REGISTRY }}/maikbuse/hyperplane/plane-live
+          images: ${{ env.REGISTRY }}/maikbuse/hyperplane/hyperplane-live
           tags: |
             type=ref,event=branch
             type=sha,prefix=sha-
