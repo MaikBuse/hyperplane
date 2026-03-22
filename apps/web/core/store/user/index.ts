@@ -185,14 +185,9 @@ export class UserStore implements IUserStore {
    * @param data
    * @returns {Promise<IUser>}
    */
-  handleSetPassword = async (csrfToken: string, data: { password: string }): Promise<IUser | undefined> => {
-    const currentUserData = cloneDeep(this.data);
+  handleSetPassword = async (_csrfToken: string, _data: { password: string }): Promise<IUser | undefined> => {
     try {
-      if (currentUserData && currentUserData.is_password_autoset && this.data) {
-        const user = await this.authService.setPassword(csrfToken, { password: data.password });
-        set(this.data, ["is_password_autoset"], false);
-        return user;
-      }
+      // Passwords are managed by Zitadel — no-op
       return undefined;
     } catch (error) {
       if (this.data) set(this.data, ["is_password_autoset"], true);

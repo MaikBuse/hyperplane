@@ -114,9 +114,8 @@ export const ProfileSetup = observer(function ProfileSetup(props: Props) {
   const handleShowPassword = (key: keyof typeof showPassword) =>
     setShowPassword((prev) => ({ ...prev, [key]: !prev[key] }));
 
-  const handleSetPassword = async (password: string) => {
-    const token = await authService.requestCSRFToken().then((data) => data?.csrf_token);
-    await authService.setPassword(token, { password });
+  const handleSetPassword = async (_password: string) => {
+    // Passwords are managed by Zitadel — no-op
   };
 
   const handleSubmitProfileSetup = async (formData: TProfileSetupFormValues) => {

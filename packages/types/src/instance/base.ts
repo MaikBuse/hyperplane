@@ -49,6 +49,7 @@ export interface IInstanceConfig {
   is_workspace_creation_disabled: boolean;
   is_zitadel_enabled: boolean;
   zitadel_issuer_url: string | undefined;
+  github_app_name: string | undefined;
   slack_client_id: string | undefined;
   posthog_api_key: string | undefined;
   posthog_host: string | undefined;

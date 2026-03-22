@@ -80,9 +80,8 @@ export const ProfileSetupStep = observer(function ProfileSetupStep({ handleStepC
   // derived values
   const userAvatar = watch("avatar_url");
 
-  const handleSetPassword = async (password: string) => {
-    const token = await authService.requestCSRFToken().then((data) => data?.csrf_token);
-    await authService.setPassword(token, { password });
+  const handleSetPassword = async (_password: string) => {
+    // Passwords are managed by Zitadel — no-op
   };
 
   const handleSubmitUserDetail = async (formData: TProfileSetupFormValues) => {
