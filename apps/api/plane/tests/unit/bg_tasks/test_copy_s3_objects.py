@@ -76,7 +76,7 @@ class TestCopyS3Objects:
         # Mock the external service call to avoid actual HTTP requests
         with patch("plane.bgtasks.copy_s3_object.sync_with_external_service") as mock_sync:
             mock_sync.return_value = {
-                "description": "test description",
+                "description_json": {"type": "doc", "content": []},
                 "description_binary": base64.b64encode(b"test binary").decode(),
             }
 
