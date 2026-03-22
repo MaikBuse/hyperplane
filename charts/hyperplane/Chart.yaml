@@ -1,0 +1,13 @@
+annotations:
+  artifacthub.io/license: AGPL-3.0
+apiVersion: v2
+appVersion: 0.24.2
+description: Hyperplane — an open-source project management tool forked from Plane,
+  with Zitadel OIDC authentication.
+home: https://github.com/maikbuse/hyperplane
+icon: https://plane.so/favicon/favicon-32x32.png
+name: hyperplane
+sources:
+- https://github.com/maikbuse/hyperplane
+type: application
+version: 0.1.0
