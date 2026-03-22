@@ -93,15 +93,6 @@ shell:
 db-shell:
     {{ compose }} exec plane-db psql -U plane -d plane
 
-# --- Auth ---
-
-# Open dev login in browser (bypasses Zitadel)
-login:
-    #!/usr/bin/env bash
-    url="http://localhost:8000/auth/dev-login/"
-    echo "Opening $url"
-    xdg-open "$url" 2>/dev/null || open "$url" 2>/dev/null || echo "Visit: $url"
-
 # --- Cleanup ---
 
 # Remove all containers and volumes (destructive!)

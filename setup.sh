@@ -1,8 +1,7 @@
 #!/bin/bash
 
-# Plane Project Setup Script
+# Hyperplane Setup Script
 # This script prepares the local development environment by setting up all necessary .env files
-# https://github.com/makeplane/plane
 
 # Set colors for output messages
 GREEN='\033[0;32m'
@@ -14,7 +13,7 @@ NC='\033[0m' # No Color
 
 # Print header
 echo -e "${BOLD}${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "${BOLD}${BLUE}                   Plane - Project Management Tool                    ${NC}"
+echo -e "${BOLD}${BLUE}                            Hyperplane                               ${NC}"
 echo -e "${BOLD}${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "${BOLD}Setting up your development environment...${NC}\n"
 
@@ -77,8 +76,10 @@ else
     success=false
 fi
 
-# Activate pnpm (version set in package.json)
-corepack enable pnpm || success=false
+# Activate pnpm via corepack if available, otherwise assume pnpm is installed
+if command -v corepack &> /dev/null; then
+    corepack enable pnpm || success=false
+fi
 # Install Node dependencies
 pnpm install || success=false
 
@@ -88,10 +89,9 @@ if [ "$success" = true ]; then
     echo -e "${GREEN}✓${NC} Environment setup completed successfully!\n"
     echo -e "${BOLD}Next steps:${NC}"
     echo -e "1. Review the .env files in each folder if needed"
-    echo -e "2. Start the services with: ${BOLD}docker compose -f docker-compose-local.yml up -d${NC}"
-    echo -e "\n${GREEN}Happy coding! 🚀${NC}"
+    echo -e "2. Start the services with: ${BOLD}just up${NC}"
+    echo -e "3. Start the frontend with: ${BOLD}just dev${NC}"
 else
-    echo -e "${RED}✗${NC} Some issues occurred during setup. Please check the errors above.\n"
-    echo -e "For help, visit: ${BLUE}https://github.com/makeplane/plane${NC}"
+    echo -e "${RED}✗${NC} Some issues occurred during setup. Please check the errors above."
     exit 1
 fi
