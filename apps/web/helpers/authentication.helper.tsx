@@ -78,6 +78,9 @@ export enum EAuthenticationErrorCodes {
   GOOGLE_OAUTH_PROVIDER_ERROR = "5115",
   GITHUB_OAUTH_PROVIDER_ERROR = "5120",
   GITLAB_OAUTH_PROVIDER_ERROR = "5121",
+  // Zitadel
+  ZITADEL_NOT_CONFIGURED = "5200",
+  ZITADEL_OIDC_PROVIDER_ERROR = "5201",
   // Reset Password
   INVALID_PASSWORD_TOKEN = "5125",
   EXPIRED_PASSWORD_TOKEN = "5130",
@@ -282,6 +285,14 @@ const errorCodeMessages: {
     title: `GitLab OAuth provider error`,
     message: () => `GitLab OAuth provider error. Please try again.`,
   },
+  [EAuthenticationErrorCodes.ZITADEL_NOT_CONFIGURED]: {
+    title: `Zitadel not configured`,
+    message: () => `Zitadel OIDC is not configured. Please contact your administrator.`,
+  },
+  [EAuthenticationErrorCodes.ZITADEL_OIDC_PROVIDER_ERROR]: {
+    title: `Authentication error`,
+    message: () => `Authentication failed. Please try again.`,
+  },
 
   // Reset Password
   [EAuthenticationErrorCodes.INVALID_PASSWORD_TOKEN]: {
@@ -425,6 +436,8 @@ export const authErrorHandler = (errorCode: EAuthenticationErrorCodes, email?: s
     EAuthenticationErrorCodes.ADMIN_USER_DEACTIVATED,
     EAuthenticationErrorCodes.RATE_LIMIT_EXCEEDED,
     EAuthenticationErrorCodes.PASSWORD_TOO_WEAK,
+    EAuthenticationErrorCodes.ZITADEL_NOT_CONFIGURED,
+    EAuthenticationErrorCodes.ZITADEL_OIDC_PROVIDER_ERROR,
   ];
 
   if (bannerAlertErrorCodes.includes(errorCode))
