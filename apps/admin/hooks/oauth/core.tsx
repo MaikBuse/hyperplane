@@ -23,11 +23,13 @@ export const getCoreAuthenticationModesMap: (
   zitadel: {
     key: "zitadel",
     name: "Zitadel OIDC",
-    description: "Authentication is managed by Zitadel. Configure your Zitadel instance settings via environment variables.",
+    description:
+      "Authentication is managed by Zitadel. Configure your Zitadel instance settings via environment variables.",
     icon: <KeyRound className="h-6 w-6 p-0.5 text-tertiary" />,
     config: (
       <div className="text-sm text-tertiary">
-        Zitadel OIDC is configured via environment variables (ZITADEL_ISSUER_URL, ZITADEL_CLIENT_ID, ZITADEL_CLIENT_SECRET).
+        Zitadel OIDC is configured via environment variables (ZITADEL_ISSUER_URL, ZITADEL_CLIENT_ID,
+        ZITADEL_CLIENT_SECRET).
       </div>
     ),
     enabledConfigKey: "IS_ZITADEL_ENABLED",
