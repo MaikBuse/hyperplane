@@ -50,14 +50,9 @@ class InstanceEndpoint(BaseAPIView):
         (
             ENABLE_SIGNUP,
             DISABLE_WORKSPACE_CREATION,
-            IS_GOOGLE_ENABLED,
-            IS_GITHUB_ENABLED,
-            GITHUB_APP_NAME,
-            IS_GITLAB_ENABLED,
-            IS_GITEA_ENABLED,
+            IS_ZITADEL_ENABLED,
+            ZITADEL_ISSUER_URL,
             EMAIL_HOST,
-            ENABLE_MAGIC_LINK_LOGIN,
-            ENABLE_EMAIL_PASSWORD,
             SLACK_CLIENT_ID,
             POSTHOG_API_KEY,
             POSTHOG_HOST,
@@ -76,34 +71,14 @@ class InstanceEndpoint(BaseAPIView):
                     "default": os.environ.get("DISABLE_WORKSPACE_CREATION", "0"),
                 },
                 {
-                    "key": "IS_GOOGLE_ENABLED",
-                    "default": os.environ.get("IS_GOOGLE_ENABLED", "0"),
+                    "key": "IS_ZITADEL_ENABLED",
+                    "default": os.environ.get("IS_ZITADEL_ENABLED", "0"),
                 },
                 {
-                    "key": "IS_GITHUB_ENABLED",
-                    "default": os.environ.get("IS_GITHUB_ENABLED", "0"),
-                },
-                {
-                    "key": "GITHUB_APP_NAME",
-                    "default": os.environ.get("GITHUB_APP_NAME", ""),
-                },
-                {
-                    "key": "IS_GITLAB_ENABLED",
-                    "default": os.environ.get("IS_GITLAB_ENABLED", "0"),
-                },
-                {
-                    "key": "IS_GITEA_ENABLED",
-                    "default": os.environ.get("IS_GITEA_ENABLED", "0"),
+                    "key": "ZITADEL_ISSUER_URL",
+                    "default": os.environ.get("ZITADEL_ISSUER_URL", ""),
                 },
                 {"key": "EMAIL_HOST", "default": os.environ.get("EMAIL_HOST", "")},
-                {
-                    "key": "ENABLE_MAGIC_LINK_LOGIN",
-                    "default": os.environ.get("ENABLE_MAGIC_LINK_LOGIN", "1"),
-                },
-                {
-                    "key": "ENABLE_EMAIL_PASSWORD",
-                    "default": os.environ.get("ENABLE_EMAIL_PASSWORD", "1"),
-                },
                 {
                     "key": "SLACK_CLIENT_ID",
                     "default": os.environ.get("SLACK_CLIENT_ID", None),
@@ -140,15 +115,8 @@ class InstanceEndpoint(BaseAPIView):
         # Authentication
         data["enable_signup"] = ENABLE_SIGNUP == "1"
         data["is_workspace_creation_disabled"] = DISABLE_WORKSPACE_CREATION == "1"
-        data["is_google_enabled"] = IS_GOOGLE_ENABLED == "1"
-        data["is_github_enabled"] = IS_GITHUB_ENABLED == "1"
-        data["is_gitlab_enabled"] = IS_GITLAB_ENABLED == "1"
-        data["is_gitea_enabled"] = IS_GITEA_ENABLED == "1"
-        data["is_magic_login_enabled"] = ENABLE_MAGIC_LINK_LOGIN == "1"
-        data["is_email_password_enabled"] = ENABLE_EMAIL_PASSWORD == "1"
-
-        # Github app name
-        data["github_app_name"] = str(GITHUB_APP_NAME)
+        data["is_zitadel_enabled"] = IS_ZITADEL_ENABLED == "1"
+        data["zitadel_issuer_url"] = ZITADEL_ISSUER_URL
 
         # Slack client
         data["slack_client_id"] = SLACK_CLIENT_ID

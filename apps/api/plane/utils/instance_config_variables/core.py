@@ -12,18 +12,6 @@ authentication_config_variables = [
         "category": "AUTHENTICATION",
         "is_encrypted": False,
     },
-    {
-        "key": "ENABLE_EMAIL_PASSWORD",
-        "value": os.environ.get("ENABLE_EMAIL_PASSWORD", "1"),
-        "category": "AUTHENTICATION",
-        "is_encrypted": False,
-    },
-    {
-        "key": "ENABLE_MAGIC_LINK_LOGIN",
-        "value": os.environ.get("ENABLE_MAGIC_LINK_LOGIN", "0"),
-        "category": "AUTHENTICATION",
-        "is_encrypted": False,
-    },
 ]
 
 workspace_management_config_variables = [
@@ -35,112 +23,24 @@ workspace_management_config_variables = [
     },
 ]
 
-google_config_variables = [
+zitadel_config_variables = [
     {
-        "key": "GOOGLE_CLIENT_ID",
-        "value": os.environ.get("GOOGLE_CLIENT_ID"),
-        "category": "GOOGLE",
+        "key": "ZITADEL_ISSUER_URL",
+        "value": os.environ.get("ZITADEL_ISSUER_URL", ""),
+        "category": "ZITADEL",
         "is_encrypted": False,
     },
     {
-        "key": "GOOGLE_CLIENT_SECRET",
-        "value": os.environ.get("GOOGLE_CLIENT_SECRET"),
-        "category": "GOOGLE",
+        "key": "ZITADEL_CLIENT_ID",
+        "value": os.environ.get("ZITADEL_CLIENT_ID", ""),
+        "category": "ZITADEL",
+        "is_encrypted": False,
+    },
+    {
+        "key": "ZITADEL_CLIENT_SECRET",
+        "value": os.environ.get("ZITADEL_CLIENT_SECRET", ""),
+        "category": "ZITADEL",
         "is_encrypted": True,
-    },
-    {
-        "key": "ENABLE_GOOGLE_SYNC",
-        "value": os.environ.get("ENABLE_GOOGLE_SYNC", "0"),
-        "category": "GOOGLE",
-        "is_encrypted": False,
-    },
-]
-
-github_config_variables = [
-    {
-        "key": "GITHUB_CLIENT_ID",
-        "value": os.environ.get("GITHUB_CLIENT_ID"),
-        "category": "GITHUB",
-        "is_encrypted": False,
-    },
-    {
-        "key": "GITHUB_CLIENT_SECRET",
-        "value": os.environ.get("GITHUB_CLIENT_SECRET"),
-        "category": "GITHUB",
-        "is_encrypted": True,
-    },
-    {
-        "key": "GITHUB_ORGANIZATION_ID",
-        "value": os.environ.get("GITHUB_ORGANIZATION_ID"),
-        "category": "GITHUB",
-        "is_encrypted": False,
-    },
-    {
-        "key": "ENABLE_GITHUB_SYNC",
-        "value": os.environ.get("ENABLE_GITHUB_SYNC", "0"),
-        "category": "GITHUB",
-        "is_encrypted": False,
-    },
-]
-
-
-gitlab_config_variables = [
-    {
-        "key": "GITLAB_HOST",
-        "value": os.environ.get("GITLAB_HOST"),
-        "category": "GITLAB",
-        "is_encrypted": False,
-    },
-    {
-        "key": "GITLAB_CLIENT_ID",
-        "value": os.environ.get("GITLAB_CLIENT_ID"),
-        "category": "GITLAB",
-        "is_encrypted": False,
-    },
-    {
-        "key": "GITLAB_CLIENT_SECRET",
-        "value": os.environ.get("GITLAB_CLIENT_SECRET"),
-        "category": "GITLAB",
-        "is_encrypted": True,
-    },
-    {
-        "key": "ENABLE_GITLAB_SYNC",
-        "value": os.environ.get("ENABLE_GITLAB_SYNC", "0"),
-        "category": "GITLAB",
-        "is_encrypted": False,
-    },
-]
-
-gitea_config_variables = [
-    {
-        "key": "IS_GITEA_ENABLED",
-        "value": os.environ.get("IS_GITEA_ENABLED", "0"),
-        "category": "GITEA",
-        "is_encrypted": False,
-    },
-    {
-        "key": "GITEA_HOST",
-        "value": os.environ.get("GITEA_HOST"),
-        "category": "GITEA",
-        "is_encrypted": False,
-    },
-    {
-        "key": "GITEA_CLIENT_ID",
-        "value": os.environ.get("GITEA_CLIENT_ID"),
-        "category": "GITEA",
-        "is_encrypted": False,
-    },
-    {
-        "key": "GITEA_CLIENT_SECRET",
-        "value": os.environ.get("GITEA_CLIENT_SECRET"),
-        "category": "GITEA",
-        "is_encrypted": True,
-    },
-    {
-        "key": "ENABLE_GITEA_SYNC",
-        "value": os.environ.get("ENABLE_GITEA_SYNC", "0"),
-        "category": "GITEA",
-        "is_encrypted": False,
     },
 ]
 
@@ -250,10 +150,7 @@ intercom_config_variables = [
 core_config_variables = [
     *authentication_config_variables,
     *workspace_management_config_variables,
-    *google_config_variables,
-    *github_config_variables,
-    *gitlab_config_variables,
-    *gitea_config_variables,
+    *zitadel_config_variables,
     *smtp_config_variables,
     *llm_config_variables,
     *unsplash_config_variables,
