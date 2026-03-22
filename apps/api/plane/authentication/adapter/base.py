@@ -125,10 +125,7 @@ class Adapter:
     def check_sync_enabled(self):
         """Check if sync is enabled for the provider"""
         provider_config_map = {
-            "google": "ENABLE_GOOGLE_SYNC",
-            "github": "ENABLE_GITHUB_SYNC",
-            "gitlab": "ENABLE_GITLAB_SYNC",
-            "gitea": "ENABLE_GITEA_SYNC",
+            "zitadel": "ENABLE_ZITADEL_SYNC",
         }
         config_key = provider_config_map.get(self.provider)
         if config_key:
