@@ -4,4 +4,5 @@
  * See the LICENSE file for details.
  */
 
-export {};
+// Placeholder for public asset utility functions
+export const PUBLIC_ASSET_PLACEHOLDER = true;

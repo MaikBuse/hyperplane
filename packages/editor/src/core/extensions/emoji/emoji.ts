@@ -22,6 +22,7 @@ import { Fragment } from "@tiptap/pm/model";
 import type { Transaction } from "@tiptap/pm/state";
 import { Plugin, PluginKey, TextSelection } from "@tiptap/pm/state";
 import type { SuggestionOptions } from "@tiptap/suggestion";
+// eslint-disable-next-line import/no-named-as-default
 import Suggestion from "@tiptap/suggestion";
 import emojiRegex from "emoji-regex";
 import { isEmojiSupported } from "is-emoji-supported";
@@ -150,17 +151,19 @@ export const Emoji = Node.create<EmojiOptions, EmojiStorage>({
   },
 
   addStorage() {
-    const { emojis } = this.options;
-    const supportMap: Record<number, boolean> = removeDuplicates(emojis.map((item) => item.version))
+    const { emojis: emojiItems } = this.options;
+    const supportMap: Record<number, boolean> = removeDuplicates(emojiItems.map((item) => item.version))
       .filter((version) => typeof version === "number")
-      .reduce((versions, version) => {
-        const emoji = emojis.find((item) => item.version === version && item.emoji);
+      .reduce(
+        (versions, version) => {
+          const emoji = emojiItems.find((item) => item.version === version && item.emoji);
 
-        return {
-          ...versions,
-          [version]: emoji ? isEmojiSupported(emoji.emoji as string) : false,
-        };
-      }, {});
+          return Object.assign(versions, {
+            [version]: emoji ? isEmojiSupported(emoji.emoji as string) : false,
+          });
+        },
+        {} as Record<number, boolean>
+      );
 
     return {
       emojis: this.options.emojis,
@@ -282,10 +285,7 @@ export const Emoji = Node.create<EmojiOptions, EmojiStorage>({
 
     if (this.options.enableEmoticons) {
       // get the list of supported emoticons
-      const emoticons = this.options.emojis
-        .map((item) => item.emoticons)
-        .flat()
-        .filter((item) => item) as string[];
+      const emoticons = this.options.emojis.flatMap((item) => item.emoticons).filter((item) => item) as string[];
 
       const emoticonRegex = new RegExp(`(?:^|\\s)(${emoticons.map((item) => escapeForRegEx(item)).join("|")}) $`);
 

@@ -24,9 +24,9 @@ export const useWorkItemCommentOperations = (
   // store hooks
   const {
     commentReaction: { getCommentReactionsByCommentId, commentReactionsByUser, getCommentReactionById },
-    createComment,
-    updateComment,
-    removeComment,
+    createComment: storeCreateComment,
+    updateComment: storeUpdateComment,
+    removeComment: storeRemoveComment,
     createCommentReaction,
     removeCommentReaction,
     issue: { getIssueById },
@@ -55,12 +55,13 @@ export const useWorkItemCommentOperations = (
             sequenceId: issueDetails.sequence_id,
           });
           const commentLink = `${workItemLink}#comment-${id}`;
-          copyUrlToClipboard(commentLink).then(() => {
+          void copyUrlToClipboard(commentLink).then(() => {
             setToast({
               title: t("common.success"),
               type: TOAST_TYPE.SUCCESS,
               message: t("issue.comments.copy_link.success"),
             });
+            return undefined;
           });
         } catch (error) {
           console.error("Error in copying comment link:", error);
@@ -74,7 +75,7 @@ export const useWorkItemCommentOperations = (
       createComment: async (data) => {
         try {
           if (!workspaceSlug || !projectId || !issueId) throw new Error("Missing fields");
-          const comment = await createComment(workspaceSlug, projectId, issueId, data);
+          const comment = await storeCreateComment(workspaceSlug, projectId, issueId, data);
           setToast({
             title: t("common.success"),
             type: TOAST_TYPE.SUCCESS,
@@ -92,7 +93,7 @@ export const useWorkItemCommentOperations = (
       updateComment: async (commentId, data) => {
         try {
           if (!workspaceSlug || !projectId || !issueId) throw new Error("Missing fields");
-          await updateComment(workspaceSlug, projectId, issueId, commentId, data);
+          await storeUpdateComment(workspaceSlug, projectId, issueId, commentId, data);
           setToast({
             title: t("common.success"),
             type: TOAST_TYPE.SUCCESS,
@@ -109,7 +110,7 @@ export const useWorkItemCommentOperations = (
       removeComment: async (commentId) => {
         try {
           if (!workspaceSlug || !projectId || !issueId) throw new Error("Missing fields");
-          await removeComment(workspaceSlug, projectId, issueId, commentId);
+          await storeRemoveComment(workspaceSlug, projectId, issueId, commentId);
           setToast({
             title: t("common.success"),
             type: TOAST_TYPE.SUCCESS,
@@ -139,7 +140,7 @@ export const useWorkItemCommentOperations = (
           return res;
         } catch (error) {
           console.log("Error in uploading comment asset:", error);
-          throw new Error(t("issue.comments.upload.error"));
+          throw new Error(t("issue.comments.upload.error"), { cause: error });
         }
       },
       duplicateCommentAsset: async (assetId, commentId) => {
@@ -210,7 +211,16 @@ export const useWorkItemCommentOperations = (
       },
     };
     return ops;
-  }, [workspaceSlug, projectId, issueId, createComment, updateComment, uploadEditorAsset, removeComment]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    workspaceSlug,
+    projectId,
+    issueId,
+    storeCreateComment,
+    storeUpdateComment,
+    uploadEditorAsset,
+    storeRemoveComment,
+  ]);
 
   return operations;
 };

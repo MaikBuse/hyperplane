@@ -30,7 +30,6 @@ import { MONTHS_LIST } from "@/constants/calendar";
 import { useIssues } from "@/hooks/store/use-issues";
 import useSize from "@/hooks/use-window-size";
 // store
-import type { IProjectEpicsFilter } from "@/plane-web/store/issue/epic";
 import type { ICycleIssuesFilter } from "@/store/issue/cycle";
 import type { ICalendarStore } from "@/store/issue/issue_calendar_view.store";
 import type { IModuleIssuesFilter } from "@/store/issue/module";
@@ -123,7 +122,8 @@ export const CalendarChart = observer(function CalendarChart(props: Props) {
         element,
       })
     );
-  }, [scrollableContainerRef?.current]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (!calendarPayload || !formattedDatePayload)
     return (
@@ -161,6 +161,7 @@ export const CalendarChart = observer(function CalendarChart(props: Props) {
                         setSelectedDate={setSelectedDate}
                         handleDragAndDrop={handleDragAndDrop}
                         issuesFilterStore={issuesFilterStore}
+                        // eslint-disable-next-line react/no-array-index-key
                         key={weekIndex}
                         week={week}
                         issues={issues}

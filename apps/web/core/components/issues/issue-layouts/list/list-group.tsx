@@ -132,6 +132,7 @@ export const ListGroup = observer(function ListGroup(props: Props) {
   const loadMore = isPaginating ? (
     <ListLoaderItemRow />
   ) : (
+    // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
     <div
       className={
         "relative flex h-11 cursor-pointer items-center gap-3 border border-transparent border-t-subtle-1 bg-surface-1 p-3 pl-8 text-13 font-medium text-accent-primary hover:text-accent-secondary hover:underline"
@@ -147,6 +148,7 @@ export const ListGroup = observer(function ListGroup(props: Props) {
     return true;
   };
 
+  // oxlint-ignore unicorn/consistent-function-scoping
   const prePopulateQuickAddData = (groupByKey: string | null, value: any) => {
     const defaultState = projectState.projectStates?.find((state) => state.default);
     let preloadedData: object = { state_id: defaultState?.id };
@@ -198,6 +200,7 @@ export const ListGroup = observer(function ListGroup(props: Props) {
           const sourceGroupId = source?.data?.groupId as string | undefined;
           const currentGroupId = group.id;
 
+          // eslint-disable-next-line no-unused-expressions
           sourceGroupId && handleWorkFlowState(sourceGroupId, currentGroupId);
 
           const sourceIndex = getGroupIndex(sourceGroupId);
@@ -236,15 +239,8 @@ export const ListGroup = observer(function ListGroup(props: Props) {
         },
       })
     );
-  }, [
-    groupRef?.current,
-    group,
-    orderBy,
-    getGroupIndex,
-    setDragColumnOrientation,
-    setIsDraggingOverColumn,
-    isWorkflowDropDisabled,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [group, orderBy, getGroupIndex, setDragColumnOrientation, setIsDraggingOverColumn, isWorkflowDropDisabled]);
 
   const isDragAllowed = group_by ? DRAG_ALLOWED_GROUPS.includes(group_by) : true;
   const canOverlayBeVisible = isWorkflowDropDisabled || orderBy !== "sort_order" || !!group.isDropDisabled;
@@ -318,6 +314,7 @@ export const ListGroup = observer(function ListGroup(props: Props) {
             ) : (
               <>
                 {Array.from({ length: 2 }).map((_, index) => (
+                  // eslint-disable-next-line react/no-array-index-key
                   <ListLoaderItemRow key={index} />
                 ))}
                 <ListLoaderItemRow ref={setIntersectionElement} />

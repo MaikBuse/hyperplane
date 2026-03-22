@@ -68,8 +68,6 @@ export interface IIssueFilterHelperStore {
 }
 
 export class IssueFilterHelperStore implements IIssueFilterHelperStore {
-  constructor() {}
-
   /**
    * @description This method is used to apply the display filters on the issues
    * @param {IIssueFilters} filters
@@ -94,7 +92,7 @@ export class IssueFilterHelperStore implements IIssueFilterHelperStore {
     displayFilters: IIssueDisplayFilterOptions | undefined,
     acceptableParamsByLayout: TIssueParams[]
   ): Partial<Record<TIssueParams, string | boolean>> => {
-    const computedDisplayFilters: Partial<Record<TIssueParams, undefined | string[] | boolean | string>> = {
+    const computedDisplayFilterParams: Partial<Record<TIssueParams, undefined | string[] | boolean | string>> = {
       group_by: displayFilters?.group_by ? EIssueGroupByToServerOptions[displayFilters.group_by] : undefined,
       sub_group_by: displayFilters?.sub_group_by
         ? EIssueGroupByToServerOptions[displayFilters.sub_group_by]
@@ -104,9 +102,9 @@ export class IssueFilterHelperStore implements IIssueFilterHelperStore {
     };
 
     const issueFiltersParams: Partial<Record<TIssueParams, boolean | string>> = {};
-    Object.keys(computedDisplayFilters).forEach((key) => {
+    Object.keys(computedDisplayFilterParams).forEach((key) => {
       const _key = key as TIssueParams;
-      const _value: string | boolean | string[] | undefined = computedDisplayFilters[_key];
+      const _value: string | boolean | string[] | undefined = computedDisplayFilterParams[_key];
       const nonEmptyArrayValue = Array.isArray(_value) && _value.length === 0 ? undefined : _value;
       if (nonEmptyArrayValue != undefined && acceptableParamsByLayout.includes(_key))
         issueFiltersParams[_key] = Array.isArray(nonEmptyArrayValue)
@@ -184,8 +182,8 @@ export class IssueFilterHelperStore implements IIssueFilterHelperStore {
     displayFilters: IIssueDisplayFilterOptions,
     defaultValues?: IIssueDisplayFilterOptions
   ): IIssueDisplayFilterOptions => {
-    const computedFilters = getComputedDisplayFilters(displayFilters, defaultValues);
-    return getEnabledDisplayFilters(computedFilters);
+    const resolvedFilters = getComputedDisplayFilters(displayFilters, defaultValues);
+    return getEnabledDisplayFilters(resolvedFilters);
   };
 
   /**

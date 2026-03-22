@@ -51,7 +51,7 @@ function RenderIfVisible(props: Props) {
       const observer = new IntersectionObserver(
         (entries) => {
           //DO no remove comments for future
-          if (typeof window !== undefined && window.requestIdleCallback && useIdletime) {
+          if (typeof window !== "undefined" && window.requestIdleCallback && useIdletime) {
             window.requestIdleCallback(() => setShouldVisible(entries[entries.length - 1].isIntersecting), {
               timeout: 300,
             });
@@ -65,13 +65,14 @@ function RenderIfVisible(props: Props) {
         }
       );
       observer.observe(intersectionRef.current);
+      const currentRef = intersectionRef.current;
       return () => {
-        if (intersectionRef.current) {
-          // eslint-disable-next-line react-hooks/exhaustive-deps
-          observer.unobserve(intersectionRef.current);
+        if (currentRef) {
+          observer.unobserve(currentRef);
         }
       };
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [intersectionRef, children, root, verticalOffset, horizontalOffset]);
 
   //Set height after render
