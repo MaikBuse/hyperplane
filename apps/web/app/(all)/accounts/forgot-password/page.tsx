@@ -4,8 +4,13 @@
  * See the LICENSE file for details.
  */
 
-import { redirect } from "next/navigation";
+import { redirect } from "react-router";
+
+// Passwords are managed by Zitadel
+export const clientLoader = () => {
+  throw redirect("/");
+};
 
 export default function ForgotPasswordPage() {
-  redirect("/");
+  return null;
 }

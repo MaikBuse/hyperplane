@@ -90,9 +90,7 @@ class ZitadelOIDCCallbackEndpoint(View):
             return HttpResponseRedirect(url)
 
         try:
-            provider = ZitadelOIDCProvider(
-                request=request, code=code, callback=post_user_auth_workflow
-            )
+            provider = ZitadelOIDCProvider(request=request, code=code, callback=post_user_auth_workflow)
             user = provider.authenticate()
             # Login the user and record device info
             user_login(request=request, user=user, is_app=True)

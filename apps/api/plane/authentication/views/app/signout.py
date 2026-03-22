@@ -29,9 +29,7 @@ class SignOutAuthEndpoint(View):
 
             # Get id_token for Zitadel end-session
             id_token = ""
-            account = Account.objects.filter(
-                user=user, provider="zitadel"
-            ).first()
+            account = Account.objects.filter(user=user, provider="zitadel").first()
             if account:
                 id_token = account.id_token
 
@@ -54,10 +52,7 @@ class SignOutAuthEndpoint(View):
                     "id_token_hint": id_token,
                     "post_logout_redirect_uri": app_base_url,
                 }
-                end_session_url = (
-                    f"{ZITADEL_ISSUER_URL.rstrip('/')}/oidc/v1/end_session"
-                    f"?{urlencode(params)}"
-                )
+                end_session_url = f"{ZITADEL_ISSUER_URL.rstrip('/')}/oidc/v1/end_session?{urlencode(params)}"
                 return HttpResponseRedirect(end_session_url)
 
             return HttpResponseRedirect(app_base_url)

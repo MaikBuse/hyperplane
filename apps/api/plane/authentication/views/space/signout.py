@@ -32,9 +32,7 @@ class SignOutAuthSpaceEndpoint(View):
 
             # Get id_token for Zitadel end-session
             id_token = ""
-            account = Account.objects.filter(
-                user=user, provider="zitadel"
-            ).first()
+            account = Account.objects.filter(user=user, provider="zitadel").first()
             if account:
                 id_token = account.id_token
 
@@ -53,22 +51,15 @@ class SignOutAuthSpaceEndpoint(View):
             )
 
             if ZITADEL_ISSUER_URL and id_token:
-                post_logout_uri = get_safe_redirect_url(
-                    base_url=space_base_url, next_path=next_path
-                )
+                post_logout_uri = get_safe_redirect_url(base_url=space_base_url, next_path=next_path)
                 params = {
                     "id_token_hint": id_token,
                     "post_logout_redirect_uri": post_logout_uri,
                 }
-                end_session_url = (
-                    f"{ZITADEL_ISSUER_URL.rstrip('/')}/oidc/v1/end_session"
-                    f"?{urlencode(params)}"
-                )
+                end_session_url = f"{ZITADEL_ISSUER_URL.rstrip('/')}/oidc/v1/end_session?{urlencode(params)}"
                 return HttpResponseRedirect(end_session_url)
 
-            url = get_safe_redirect_url(
-                base_url=space_base_url, next_path=next_path
-            )
+            url = get_safe_redirect_url(base_url=space_base_url, next_path=next_path)
             return HttpResponseRedirect(url)
         except Exception:
             url = get_safe_redirect_url(

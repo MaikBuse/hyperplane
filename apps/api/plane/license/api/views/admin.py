@@ -118,12 +118,10 @@ class InstanceAdminSignUpEndpoint(View):
         try:
             state = uuid.uuid4().hex
             admin_redirect_uri = (
-                f'{"https" if request.is_secure() else "http"}://'
+                f"{'https' if request.is_secure() else 'http'}://"
                 f"{request.get_host()}/api/instances/admins/oidc/callback/"
             )
-            provider = ZitadelOIDCProvider(
-                request=request, state=state, redirect_uri=admin_redirect_uri
-            )
+            provider = ZitadelOIDCProvider(request=request, state=state, redirect_uri=admin_redirect_uri)
             request.session["state"] = state
             request.session["admin_setup"] = True
             auth_url = provider.get_auth_url()
@@ -158,12 +156,10 @@ class InstanceAdminSignInEndpoint(View):
         try:
             state = uuid.uuid4().hex
             admin_redirect_uri = (
-                f'{"https" if request.is_secure() else "http"}://'
+                f"{'https' if request.is_secure() else 'http'}://"
                 f"{request.get_host()}/api/instances/admins/oidc/callback/"
             )
-            provider = ZitadelOIDCProvider(
-                request=request, state=state, redirect_uri=admin_redirect_uri
-            )
+            provider = ZitadelOIDCProvider(request=request, state=state, redirect_uri=admin_redirect_uri)
             request.session["state"] = state
             request.session["admin_sign_in"] = True
             auth_url = provider.get_auth_url()
@@ -213,7 +209,7 @@ class InstanceAdminOIDCCallbackEndpoint(View):
 
         try:
             admin_redirect_uri = (
-                f'{"https" if request.is_secure() else "http"}://'
+                f"{'https' if request.is_secure() else 'http'}://"
                 f"{request.get_host()}/api/instances/admins/oidc/callback/"
             )
             provider = ZitadelOIDCProvider(
@@ -299,9 +295,7 @@ class InstanceAdminSignOutEndpoint(View):
 
             # Get id_token for Zitadel end-session
             id_token = ""
-            account = Account.objects.filter(
-                user=user, provider="zitadel"
-            ).first()
+            account = Account.objects.filter(user=user, provider="zitadel").first()
             if account:
                 id_token = account.id_token
 
@@ -326,10 +320,7 @@ class InstanceAdminSignOutEndpoint(View):
                     "id_token_hint": id_token,
                     "post_logout_redirect_uri": admin_base_url,
                 }
-                end_session_url = (
-                    f"{ZITADEL_ISSUER_URL.rstrip('/')}/oidc/v1/end_session"
-                    f"?{_urlencode(params)}"
-                )
+                end_session_url = f"{ZITADEL_ISSUER_URL.rstrip('/')}/oidc/v1/end_session?{_urlencode(params)}"
                 return HttpResponseRedirect(end_session_url)
 
             url = get_safe_redirect_url(base_url=admin_base_url, next_path="")

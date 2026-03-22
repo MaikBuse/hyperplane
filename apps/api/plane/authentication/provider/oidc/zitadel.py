@@ -19,23 +19,21 @@ class ZitadelOIDCProvider(OauthAdapter):
     provider = "zitadel"
 
     def __init__(self, request, code=None, state=None, callback=None, redirect_uri=None):
-        (ZITADEL_ISSUER_URL, ZITADEL_CLIENT_ID, ZITADEL_CLIENT_SECRET) = (
-            get_configuration_value(
-                [
-                    {
-                        "key": "ZITADEL_ISSUER_URL",
-                        "default": os.environ.get("ZITADEL_ISSUER_URL"),
-                    },
-                    {
-                        "key": "ZITADEL_CLIENT_ID",
-                        "default": os.environ.get("ZITADEL_CLIENT_ID"),
-                    },
-                    {
-                        "key": "ZITADEL_CLIENT_SECRET",
-                        "default": os.environ.get("ZITADEL_CLIENT_SECRET"),
-                    },
-                ]
-            )
+        (ZITADEL_ISSUER_URL, ZITADEL_CLIENT_ID, ZITADEL_CLIENT_SECRET) = get_configuration_value(
+            [
+                {
+                    "key": "ZITADEL_ISSUER_URL",
+                    "default": os.environ.get("ZITADEL_ISSUER_URL"),
+                },
+                {
+                    "key": "ZITADEL_CLIENT_ID",
+                    "default": os.environ.get("ZITADEL_CLIENT_ID"),
+                },
+                {
+                    "key": "ZITADEL_CLIENT_SECRET",
+                    "default": os.environ.get("ZITADEL_CLIENT_SECRET"),
+                },
+            ]
         )
 
         if not (ZITADEL_ISSUER_URL and ZITADEL_CLIENT_ID and ZITADEL_CLIENT_SECRET):
@@ -53,10 +51,7 @@ class ZitadelOIDCProvider(OauthAdapter):
 
         scope = "openid email profile"
         if not redirect_uri:
-            redirect_uri = (
-                f'{"https" if request.is_secure() else "http"}://'
-                f"{request.get_host()}/auth/zitadel/callback/"
-            )
+            redirect_uri = f"{'https' if request.is_secure() else 'http'}://{request.get_host()}/auth/zitadel/callback/"
 
         url_params = {
             "client_id": client_id,
@@ -65,9 +60,7 @@ class ZitadelOIDCProvider(OauthAdapter):
             "response_type": "code",
             "state": state,
         }
-        auth_url = (
-            f"{oidc_config['authorization_endpoint']}?{urlencode(url_params)}"
-        )
+        auth_url = f"{oidc_config['authorization_endpoint']}?{urlencode(url_params)}"
 
         token_url = oidc_config["token_endpoint"]
         userinfo_url = oidc_config["userinfo_endpoint"]
@@ -97,9 +90,7 @@ class ZitadelOIDCProvider(OauthAdapter):
             return response.json()
         except requests.RequestException:
             raise AuthenticationException(
-                error_code=AUTHENTICATION_ERROR_CODES[
-                    "ZITADEL_OIDC_PROVIDER_ERROR"
-                ],
+                error_code=AUTHENTICATION_ERROR_CODES["ZITADEL_OIDC_PROVIDER_ERROR"],
                 error_message="ZITADEL_OIDC_PROVIDER_ERROR",
             )
 
@@ -119,9 +110,7 @@ class ZitadelOIDCProvider(OauthAdapter):
                 "access_token": token_response.get("access_token"),
                 "refresh_token": token_response.get("refresh_token", None),
                 "access_token_expired_at": (
-                    datetime.now(tz=pytz.utc) + timedelta(seconds=expires_in)
-                    if expires_in
-                    else None
+                    datetime.now(tz=pytz.utc) + timedelta(seconds=expires_in) if expires_in else None
                 ),
                 "refresh_token_expired_at": None,
                 "id_token": token_response.get("id_token", ""),

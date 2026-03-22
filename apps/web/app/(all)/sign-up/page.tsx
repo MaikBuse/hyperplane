@@ -4,9 +4,13 @@
  * See the LICENSE file for details.
  */
 
-import { redirect } from "next/navigation";
+import { redirect } from "react-router";
 
-// Sign-up is handled by Zitadel — redirect to main page
+// Sign-up is handled by Zitadel
+export const clientLoader = () => {
+  throw redirect("/");
+};
+
 export default function SignUpPage() {
-  redirect("/");
+  return null;
 }

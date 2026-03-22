@@ -18,17 +18,14 @@ export type TInstanceAuthenticationModes = {
   unavailable?: boolean;
 };
 
-export type TInstanceAuthenticationMethodKeys =
-  | "ENABLE_SIGNUP"
-  | "IS_ZITADEL_ENABLED";
+export type TInstanceAuthenticationMethodKeys = "ENABLE_SIGNUP" | "IS_ZITADEL_ENABLED";
 
 export type TInstanceZitadelAuthenticationConfigurationKeys =
   | "ZITADEL_ISSUER_URL"
   | "ZITADEL_CLIENT_ID"
   | "ZITADEL_CLIENT_SECRET";
 
-export type TInstanceAuthenticationConfigurationKeys =
-  TInstanceZitadelAuthenticationConfigurationKeys;
+export type TInstanceAuthenticationConfigurationKeys = TInstanceZitadelAuthenticationConfigurationKeys;
 
 export type TInstanceAuthenticationKeys = TInstanceAuthenticationMethodKeys | TInstanceAuthenticationConfigurationKeys;
 
