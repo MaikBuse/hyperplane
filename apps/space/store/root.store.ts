@@ -80,3 +80,6 @@ export class RootStore {
     this.publishList = new PublishListStore(this);
   }
 }
+
+// Alias for backwards compatibility
+export { RootStore as CoreRootStore };

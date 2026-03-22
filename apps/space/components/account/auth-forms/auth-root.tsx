@@ -14,6 +14,7 @@ import { Button } from "@plane/ui";
 import type { TAuthErrorInfo } from "@/helpers/authentication.helper";
 import { EErrorAlertType, authErrorHandler, EAuthenticationErrorCodes } from "@/helpers/authentication.helper";
 // local imports
+import { EAuthModes } from "@/types/auth";
 import { AuthBanner } from "./auth-banner";
 import { AuthHeader } from "./auth-header";
 
@@ -43,7 +44,7 @@ export const AuthRoot = observer(function AuthRoot() {
         {errorInfo && errorInfo?.type === EErrorAlertType.BANNER_ALERT && (
           <AuthBanner bannerData={errorInfo} handleBannerData={(value) => setErrorInfo(value)} />
         )}
-        <AuthHeader />
+        <AuthHeader authMode={EAuthModes.SIGN_IN} />
         <Button size="xl" className="w-full" onClick={handleSignIn}>
           Sign in
         </Button>
