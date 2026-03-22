@@ -4,13 +4,22 @@
  * See the LICENSE file for details.
  */
 
-import { redirect } from "react-router";
+// components
+import { AuthBase } from "@/components/auth-screens/auth-base";
+// helpers
+import { EAuthModes, EPageTypes } from "@/helpers/authentication.helper";
+// assets
+import DefaultLayout from "@/layouts/default-layout";
+import { AuthenticationWrapper } from "@/lib/wrappers/authentication-wrapper";
 
-// Sign-up is handled by Zitadel
-export const clientLoader = () => {
-  throw redirect("/");
-};
-
-export default function SignUpPage() {
-  return null;
+function SignUpPage() {
+  return (
+    <DefaultLayout>
+      <AuthenticationWrapper pageType={EPageTypes.NON_AUTHENTICATED}>
+        <AuthBase authType={EAuthModes.SIGN_UP} />
+      </AuthenticationWrapper>
+    </DefaultLayout>
+  );
 }
+
+export default SignUpPage;

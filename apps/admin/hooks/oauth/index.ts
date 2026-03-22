@@ -11,5 +11,5 @@ import type { TGetAuthenticationModeProps } from "./types";
 export const useAuthenticationModes = (props: TGetAuthenticationModeProps): TInstanceAuthenticationModes[] => {
   const authenticationModes = getCoreAuthenticationModesMap(props);
 
-  return [authenticationModes["zitadel"]];
+  return Object.values(authenticationModes).filter((v): v is TInstanceAuthenticationModes => v !== undefined);
 };

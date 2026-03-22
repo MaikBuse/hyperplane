@@ -3,14 +3,17 @@
 # See the LICENSE file for details.
 
 # Python imports
-import os
-import uuid
 from urllib.parse import urlencode, urljoin
+import uuid
+from zxcvbn import zxcvbn
 
 # Django imports
 from django.http import HttpResponseRedirect
 from django.views import View
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth import logout
 
 # Third party imports
@@ -26,7 +29,7 @@ from plane.license.api.serializers import (
     InstanceAdminSerializer,
 )
 from plane.license.models import Instance, InstanceAdmin
-from plane.db.models import User, Account
+from plane.db.models import User, Profile
 from plane.utils.cache import cache_response, invalidate_cache
 from plane.authentication.utils.login import user_login
 from plane.authentication.utils.host import base_host, user_ip
@@ -34,11 +37,8 @@ from plane.authentication.adapter.error import (
     AUTHENTICATION_ERROR_CODES,
     AuthenticationException,
 )
-from plane.authentication.provider.oidc.zitadel import ZitadelOIDCProvider
-from plane.authentication.utils.user_auth_workflow import post_user_auth_workflow
 from plane.utils.ip_address import get_client_ip
 from plane.utils.path_validator import get_safe_redirect_url
-from plane.license.utils.instance_value import get_configuration_value
 
 
 class InstanceAdminEndpoint(BaseAPIView):
@@ -87,11 +87,11 @@ class InstanceAdminEndpoint(BaseAPIView):
 
 
 class InstanceAdminSignUpEndpoint(View):
-    """Redirects to Zitadel OIDC for initial admin setup."""
-
     permission_classes = [AllowAny]
 
-    def get(self, request):
+    @invalidate_cache(path="/api/instances/", user=False)
+    def post(self, request):
+        # Check instance first
         instance = Instance.objects.first()
         if instance is None:
             exc = AuthenticationException(
@@ -104,6 +104,7 @@ class InstanceAdminSignUpEndpoint(View):
             )
             return HttpResponseRedirect(url)
 
+        # check if the instance has already an admin registered
         if InstanceAdmin.objects.first():
             exc = AuthenticationException(
                 error_code=AUTHENTICATION_ERROR_CODES["ADMIN_ALREADY_EXIST"],
@@ -115,32 +116,135 @@ class InstanceAdminSignUpEndpoint(View):
             )
             return HttpResponseRedirect(url)
 
-        try:
-            state = uuid.uuid4().hex
-            admin_redirect_uri = (
-                f"{'https' if request.is_secure() else 'http'}://"
-                f"{request.get_host()}/api/instances/admins/oidc/callback/"
+        # Get the email and password from all the user
+        email = request.POST.get("email", False)
+        password = request.POST.get("password", False)
+        first_name = request.POST.get("first_name", False)
+        last_name = request.POST.get("last_name", "")
+        company_name = request.POST.get("company_name", "")
+        is_telemetry_enabled = request.POST.get("is_telemetry_enabled", True)
+
+        # return error if the email and password is not present
+        if not email or not password or not first_name:
+            exc = AuthenticationException(
+                error_code=AUTHENTICATION_ERROR_CODES["REQUIRED_ADMIN_EMAIL_PASSWORD_FIRST_NAME"],
+                error_message="REQUIRED_ADMIN_EMAIL_PASSWORD_FIRST_NAME",
+                payload={
+                    "email": email,
+                    "first_name": first_name,
+                    "last_name": last_name,
+                    "company_name": company_name,
+                    "is_telemetry_enabled": is_telemetry_enabled,
+                },
             )
-            provider = ZitadelOIDCProvider(request=request, state=state, redirect_uri=admin_redirect_uri)
-            request.session["state"] = state
-            request.session["admin_setup"] = True
-            auth_url = provider.get_auth_url()
-            return HttpResponseRedirect(auth_url)
-        except AuthenticationException as e:
-            params = e.get_error_dict()
+            url = urljoin(
+                base_host(
+                    request=request,
+                    is_admin=True,
+                ),
+                "?" + urlencode(exc.get_error_dict()),
+            )
+            return HttpResponseRedirect(url)
+
+        # Validate the email
+        email = email.strip().lower()
+        try:
+            validate_email(email)
+        except ValidationError:
+            exc = AuthenticationException(
+                error_code=AUTHENTICATION_ERROR_CODES["INVALID_ADMIN_EMAIL"],
+                error_message="INVALID_ADMIN_EMAIL",
+                payload={
+                    "email": email,
+                    "first_name": first_name,
+                    "last_name": last_name,
+                    "company_name": company_name,
+                    "is_telemetry_enabled": is_telemetry_enabled,
+                },
+            )
             url = urljoin(
                 base_host(request=request, is_admin=True),
-                "?" + urlencode(params),
+                "?" + urlencode(exc.get_error_dict()),
             )
+            return HttpResponseRedirect(url)
+
+        # Check if already a user exists or not
+        # Existing user
+        if User.objects.filter(email=email).exists():
+            exc = AuthenticationException(
+                error_code=AUTHENTICATION_ERROR_CODES["ADMIN_USER_ALREADY_EXIST"],
+                error_message="ADMIN_USER_ALREADY_EXIST",
+                payload={
+                    "email": email,
+                    "first_name": first_name,
+                    "last_name": last_name,
+                    "company_name": company_name,
+                    "is_telemetry_enabled": is_telemetry_enabled,
+                },
+            )
+            url = urljoin(
+                base_host(request=request, is_admin=True),
+                "?" + urlencode(exc.get_error_dict()),
+            )
+            return HttpResponseRedirect(url)
+        else:
+            results = zxcvbn(password)
+            if results["score"] < 3:
+                exc = AuthenticationException(
+                    error_code=AUTHENTICATION_ERROR_CODES["PASSWORD_TOO_WEAK"],
+                    error_message="PASSWORD_TOO_WEAK",
+                    payload={
+                        "email": email,
+                        "first_name": first_name,
+                        "last_name": last_name,
+                        "company_name": company_name,
+                        "is_telemetry_enabled": is_telemetry_enabled,
+                    },
+                )
+                url = urljoin(
+                    base_host(request=request, is_admin=True),
+                    "?" + urlencode(exc.get_error_dict()),
+                )
+                return HttpResponseRedirect(url)
+
+            user = User.objects.create(
+                first_name=first_name,
+                last_name=last_name,
+                email=email,
+                username=uuid.uuid4().hex,
+                password=make_password(password),
+                is_password_autoset=False,
+            )
+            _ = Profile.objects.create(user=user, company_name=company_name)
+            # settings last active for the user
+            user.is_active = True
+            user.last_active = timezone.now()
+            user.last_login_time = timezone.now()
+            user.last_login_ip = get_client_ip(request=request)
+            user.last_login_uagent = request.META.get("HTTP_USER_AGENT")
+            user.token_updated_at = timezone.now()
+            user.save()
+
+            # Register the user as an instance admin
+            _ = InstanceAdmin.objects.create(user=user, instance=instance)
+            # Make the setup flag True
+            instance.is_setup_done = True
+            instance.instance_name = company_name
+            instance.is_telemetry_enabled = is_telemetry_enabled
+            instance.save()
+
+            # get tokens for user
+            user_login(request=request, user=user, is_admin=True)
+            url = urljoin(base_host(request=request, is_admin=True), "general/")
             return HttpResponseRedirect(url)
 
 
 class InstanceAdminSignInEndpoint(View):
-    """Redirects to Zitadel OIDC for admin sign-in."""
-
     permission_classes = [AllowAny]
 
-    def get(self, request):
+    @invalidate_cache(path="/api/instances/", user=False)
+    def post(self, request):
+        # Check instance first
         instance = Instance.objects.first()
         if instance is None:
             exc = AuthenticationException(
@@ -153,42 +257,16 @@ class InstanceAdminSignInEndpoint(View):
             )
             return HttpResponseRedirect(url)
 
-        try:
-            state = uuid.uuid4().hex
-            admin_redirect_uri = (
-                f"{'https' if request.is_secure() else 'http'}://"
-                f"{request.get_host()}/api/instances/admins/oidc/callback/"
-            )
-            provider = ZitadelOIDCProvider(request=request, state=state, redirect_uri=admin_redirect_uri)
-            request.session["state"] = state
-            request.session["admin_sign_in"] = True
-            auth_url = provider.get_auth_url()
-            return HttpResponseRedirect(auth_url)
-        except AuthenticationException as e:
-            params = e.get_error_dict()
-            url = urljoin(
-                base_host(request=request, is_admin=True),
-                "?" + urlencode(params),
-            )
-            return HttpResponseRedirect(url)
+        # Get email and password
+        email = request.POST.get("email", False)
+        password = request.POST.get("password", False)
 
-
-class InstanceAdminOIDCCallbackEndpoint(View):
-    """Handles Zitadel OIDC callback for admin sign-in and setup."""
-
-    permission_classes = [AllowAny]
-
-    @invalidate_cache(path="/api/instances/", user=False)
-    def get(self, request):
-        code = request.GET.get("code")
-        state = request.GET.get("state")
-        is_setup = request.session.pop("admin_setup", False)
-        request.session.pop("admin_sign_in", None)
-
-        if state != request.session.get("state", ""):
+        # return error if the email and password is not present
+        if not email or not password:
             exc = AuthenticationException(
-                error_code=AUTHENTICATION_ERROR_CODES["ZITADEL_OIDC_PROVIDER_ERROR"],
-                error_message="ZITADEL_OIDC_PROVIDER_ERROR",
+                error_code=AUTHENTICATION_ERROR_CODES["REQUIRED_ADMIN_EMAIL_PASSWORD"],
+                error_message="REQUIRED_ADMIN_EMAIL_PASSWORD",
+                payload={"email": email},
             )
             url = urljoin(
                 base_host(request=request, is_admin=True),
@@ -196,10 +274,15 @@ class InstanceAdminOIDCCallbackEndpoint(View):
             )
             return HttpResponseRedirect(url)
 
-        if not code:
+        # Validate the email
+        email = email.strip().lower()
+        try:
+            validate_email(email)
+        except ValidationError:
             exc = AuthenticationException(
-                error_code=AUTHENTICATION_ERROR_CODES["ZITADEL_OIDC_PROVIDER_ERROR"],
-                error_message="ZITADEL_OIDC_PROVIDER_ERROR",
+                error_code=AUTHENTICATION_ERROR_CODES["INVALID_ADMIN_EMAIL"],
+                error_message="INVALID_ADMIN_EMAIL",
+                payload={"email": email},
             )
             url = urljoin(
                 base_host(request=request, is_admin=True),
@@ -207,58 +290,72 @@ class InstanceAdminOIDCCallbackEndpoint(View):
             )
             return HttpResponseRedirect(url)
 
-        try:
-            admin_redirect_uri = (
-                f"{'https' if request.is_secure() else 'http'}://"
-                f"{request.get_host()}/api/instances/admins/oidc/callback/"
+        # Fetch the user
+        user = User.objects.filter(email=email).first()
+
+        # Error out if the user is not present
+        if not user:
+            exc = AuthenticationException(
+                error_code=AUTHENTICATION_ERROR_CODES["ADMIN_USER_DOES_NOT_EXIST"],
+                error_message="ADMIN_USER_DOES_NOT_EXIST",
+                payload={"email": email},
             )
-            provider = ZitadelOIDCProvider(
-                request=request,
-                code=code,
-                callback=post_user_auth_workflow,
-                redirect_uri=admin_redirect_uri,
-            )
-            user = provider.authenticate()
-
-            instance = Instance.objects.first()
-
-            if is_setup and not InstanceAdmin.objects.exists():
-                # First admin setup — register user as instance admin
-                InstanceAdmin.objects.create(user=user, instance=instance)
-                instance.is_setup_done = True
-                instance.save()
-            else:
-                # Normal admin sign-in — verify user is an instance admin
-                if not InstanceAdmin.objects.filter(instance=instance, user=user).exists():
-                    exc = AuthenticationException(
-                        error_code=AUTHENTICATION_ERROR_CODES["ADMIN_AUTHENTICATION_FAILED"],
-                        error_message="ADMIN_AUTHENTICATION_FAILED",
-                    )
-                    url = urljoin(
-                        base_host(request=request, is_admin=True),
-                        "?" + urlencode(exc.get_error_dict()),
-                    )
-                    return HttpResponseRedirect(url)
-
-            # Update user activity
-            user.is_active = True
-            user.last_active = timezone.now()
-            user.last_login_time = timezone.now()
-            user.last_login_ip = get_client_ip(request=request)
-            user.last_login_uagent = request.META.get("HTTP_USER_AGENT")
-            user.token_updated_at = timezone.now()
-            user.save()
-
-            user_login(request=request, user=user, is_admin=True)
-            url = urljoin(base_host(request=request, is_admin=True), "general/")
-            return HttpResponseRedirect(url)
-        except AuthenticationException as e:
-            params = e.get_error_dict()
             url = urljoin(
                 base_host(request=request, is_admin=True),
-                "?" + urlencode(params),
+                "?" + urlencode(exc.get_error_dict()),
             )
             return HttpResponseRedirect(url)
+
+        # is_active
+        if not user.is_active:
+            exc = AuthenticationException(
+                error_code=AUTHENTICATION_ERROR_CODES["ADMIN_USER_DEACTIVATED"],
+                error_message="ADMIN_USER_DEACTIVATED",
+            )
+            url = urljoin(
+                base_host(request=request, is_admin=True),
+                "?" + urlencode(exc.get_error_dict()),
+            )
+            return HttpResponseRedirect(url)
+
+        # Check password of the user
+        if not user.check_password(password):
+            exc = AuthenticationException(
+                error_code=AUTHENTICATION_ERROR_CODES["ADMIN_AUTHENTICATION_FAILED"],
+                error_message="ADMIN_AUTHENTICATION_FAILED",
+                payload={"email": email},
+            )
+            url = urljoin(
+                base_host(request=request, is_admin=True),
+                "?" + urlencode(exc.get_error_dict()),
+            )
+            return HttpResponseRedirect(url)
+
+        # Check if the user is an instance admin
+        if not InstanceAdmin.objects.filter(instance=instance, user=user):
+            exc = AuthenticationException(
+                error_code=AUTHENTICATION_ERROR_CODES["ADMIN_AUTHENTICATION_FAILED"],
+                error_message="ADMIN_AUTHENTICATION_FAILED",
+                payload={"email": email},
+            )
+            url = urljoin(
+                base_host(request=request, is_admin=True),
+                "?" + urlencode(exc.get_error_dict()),
+            )
+            return HttpResponseRedirect(url)
+        # settings last active for the user
+        user.is_active = True
+        user.last_active = timezone.now()
+        user.last_login_time = timezone.now()
+        user.last_login_ip = get_client_ip(request=request)
+        user.last_login_uagent = request.META.get("HTTP_USER_AGENT")
+        user.token_updated_at = timezone.now()
+        user.save()
+
+        # get tokens for user
+        user_login(request=request, user=user, is_admin=True)
+        url = urljoin(base_host(request=request, is_admin=True), "general/")
+        return HttpResponseRedirect(url)
 
 
 class InstanceAdminUserMeEndpoint(BaseAPIView):
@@ -292,38 +389,9 @@ class InstanceAdminSignOutEndpoint(View):
             user.last_logout_ip = user_ip(request=request)
             user.last_logout_time = timezone.now()
             user.save()
-
-            # Get id_token for Zitadel end-session
-            id_token = ""
-            account = Account.objects.filter(user=user, provider="zitadel").first()
-            if account:
-                id_token = account.id_token
-
             # Log the user out
             logout(request)
-
-            # Redirect to Zitadel end-session endpoint
-            admin_base_url = base_host(request=request, is_admin=True)
-            (ZITADEL_ISSUER_URL,) = get_configuration_value(
-                [
-                    {
-                        "key": "ZITADEL_ISSUER_URL",
-                        "default": os.environ.get("ZITADEL_ISSUER_URL", ""),
-                    },
-                ]
-            )
-
-            if ZITADEL_ISSUER_URL and id_token:
-                from urllib.parse import urlencode as _urlencode
-
-                params = {
-                    "id_token_hint": id_token,
-                    "post_logout_redirect_uri": admin_base_url,
-                }
-                end_session_url = f"{ZITADEL_ISSUER_URL.rstrip('/')}/oidc/v1/end_session?{_urlencode(params)}"
-                return HttpResponseRedirect(end_session_url)
-
-            url = get_safe_redirect_url(base_url=admin_base_url, next_path="")
+            url = get_safe_redirect_url(base_url=base_host(request=request, is_admin=True), next_path="")
             return HttpResponseRedirect(url)
         except Exception:
             url = get_safe_redirect_url(base_url=base_host(request=request, is_admin=True), next_path="")

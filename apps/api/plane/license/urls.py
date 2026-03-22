@@ -9,7 +9,6 @@ from plane.license.api.views import (
     InstanceAdminEndpoint,
     InstanceAdminSignInEndpoint,
     InstanceAdminSignUpEndpoint,
-    InstanceAdminOIDCCallbackEndpoint,
     InstanceConfigurationEndpoint,
     DisableEmailFeatureEndpoint,
     InstanceEndpoint,
@@ -55,11 +54,6 @@ urlpatterns = [
         "admins/sign-up/",
         InstanceAdminSignUpEndpoint.as_view(),
         name="instance-admin-sign-up",
-    ),
-    path(
-        "admins/oidc/callback/",
-        InstanceAdminOIDCCallbackEndpoint.as_view(),
-        name="instance-admin-oidc-callback",
     ),
     path(
         "admins/sign-up-screen-visited/",

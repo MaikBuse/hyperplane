@@ -47,8 +47,12 @@ export interface IInstance {
 export interface IInstanceConfig {
   enable_signup: boolean;
   is_workspace_creation_disabled: boolean;
-  is_zitadel_enabled: boolean;
-  zitadel_issuer_url: string | undefined;
+  is_google_enabled: boolean;
+  is_github_enabled: boolean;
+  is_gitlab_enabled: boolean;
+  is_gitea_enabled: boolean;
+  is_magic_login_enabled: boolean;
+  is_email_password_enabled: boolean;
   github_app_name: string | undefined;
   slack_client_id: string | undefined;
   posthog_api_key: string | undefined;

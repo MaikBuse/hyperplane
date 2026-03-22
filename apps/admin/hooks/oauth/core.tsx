@@ -15,7 +15,7 @@ import type {
 // Authentication methods
 export const getCoreAuthenticationModesMap: (
   props: TGetBaseAuthenticationModeProps
-) => Record<TCoreInstanceAuthenticationModeKeys, TInstanceAuthenticationModes> = ({
+) => Partial<Record<TCoreInstanceAuthenticationModeKeys, TInstanceAuthenticationModes>> = ({
   disabled: _disabled,
   updateConfig: _updateConfig,
   resolvedTheme: _resolvedTheme,
