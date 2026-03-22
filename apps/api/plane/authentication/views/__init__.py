@@ -6,6 +6,7 @@ from .common import CSRFTokenEndpoint
 
 from .app.zitadel import ZitadelOIDCInitiateEndpoint, ZitadelOIDCCallbackEndpoint
 from .app.signout import SignOutAuthEndpoint
+from .app.dev_login import DevLoginEndpoint
 
 from .space.zitadel import ZitadelOIDCInitiateSpaceEndpoint, ZitadelOIDCCallbackSpaceEndpoint
 from .space.signout import SignOutAuthSpaceEndpoint
